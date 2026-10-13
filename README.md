@@ -1,3 +1,39 @@
+# Análise de ações com K-means
+
+Trabalho somativo de IA e Big Data (dezembro de 2024): análise exploratória e agrupamento
+não supervisionado de um conjunto de ações fictícias com K-means, no notebook `codigo.ipynb`.
+
+## O que foi feito
+1. **Carga e exploração** — `dadosacoes.csv` (100 linhas, 4 colunas: nome da ação, preço, quantidade de cotas e valor de mercado em bilhões); `head()`, `info()`, `describe()` e checagem de nulos; boxplots (seaborn) do preço e do valor de mercado por ação.
+2. **Pré-processamento** — `pd.get_dummies(drop_first=True)` na coluna de nome da ação (gera 6 colunas booleanas para 7 ações); `fillna` pela média e `dropna` (não havia nulos).
+3. **K-means** — um primeiro ajuste com 4 grupos direto nos valores brutos; depois padronização com `StandardScaler` e K-means com 4, 5 e 8 grupos (`random_state=42`), usando preço, cotas e valor de mercado.
+4. **Escolha de k** — gráfico do cotovelo (inércia para k de 1 a 8) e silhueta para k = 4 (score médio e histograma dos valores por ponto).
+5. **Visualização** — dispersão 2D (preço × valor de mercado, colorida por grupo) e 3D (preço × cotas × valor de mercado), além da 3D do primeiro ajuste.
+6. **Questão 5** — resposta sobre a vantagem do aprendizado não supervisionado, em célula markdown no fim do notebook.
+
+## Resultados principais (lidos das saídas do notebook)
+- Dados: 100 ações de 7 nomes (GOOGLE 25, VALE3 15, SUZB3 14, ELEKTRO 13, APPLE 12, AMAZON 11, PETR4 10). Preço médio R$ 136,14 (de 15 a 253); cotas em média 52 (de 2 a 97); valor de mercado médio 2.433,7 bilhões (de 52 a 4.993).
+- K-means sem padronizar (k = 4): os grupos se separam quase só pelo valor de mercado — médias de 4.264, 3.137, 2.101 e 554 bilhões — enquanto preço e cotas ficam parecidos entre os grupos (preço médio entre 102 e 153).
+- Silhueta para k = 4 nos dados padronizados: **0,303**, ou seja, grupos pouco separados.
+- O cotovelo é calculado para k de 1 a 8; os rótulos de 5 e 8 grupos ficam em `Cluster_5` e `Cluster_8`, mas o notebook não compara métricas entre os valores de k.
+
+## Observações honestas
+- O conjunto é sintético e pequeno (100 linhas): a mesma ação aparece com preços e valores de mercado muito diferentes (SUZB3 a R$ 91, 165 e 56), o que não acontece em dados reais. Os grupos refletem o sorteio dos dados, não o mercado.
+- O primeiro K-means roda **sem padronizar**: o valor de mercado está em milhares e o preço em centenas, então a distância é dominada pelo valor de mercado e os grupos daquele ajuste são faixas de valor de mercado. O ajuste seguinte, com `StandardScaler`, corrige isso; a silhueta e as visualizações 2D/3D finais usam o padronizado.
+- Silhueta de 0,30 é fraca, e o k = 4 vem do enunciado, não de uma escolha pelos gráficos.
+- Os dummies do nome da ação são criados, mas não entram no K-means (as features são só as três colunas numéricas) — o que é adequado, só não está dito no notebook.
+- `KMeans` sem `n_init` explícito gera `FutureWarning` no scikit-learn 1.2/1.3; em versões novas o padrão já é `n_init='auto'`.
+- `fillna`/`dropna` não mudam nada (não há nulos), e a numeração das questões no notebook (6) difere do enunciado (5, repetido).
+
+## Como rodar
+```bash
+pip install -r requirements.txt
+jupyter notebook codigo.ipynb
+```
+Rode as células em ordem; o CSV precisa estar na mesma pasta do notebook.
+
+## Enunciado original
+
 Você foi contratado pela empresa S&M Data Analytics para realizar a análise de um determinado
 conjunto de dados de uma companhia de investimentos.
 Nesse conjunto de dados há diversas informações sobre os ativos de investimentos Nome da ação,
@@ -36,3 +72,7 @@ d) Plotar o gráfico da silhueta
 a) Visualização 2d dos clusters formados
 b) Visualização 3d dos clusters formados
 5) Qual a maior vantagem do aprendizado não supervisionado diante o aprendizado supervisionado ?
+
+## Licença
+
+MIT — ver [LICENSE](LICENSE).
